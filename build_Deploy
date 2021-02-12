@@ -26,7 +26,7 @@ stage('build') {
       step([$class: 'UploadBuild',
       tenantId: "5ade13625558f2c6688d15ce",
       revision: "${GIT_COMMIT}",
-      appName: "Fiori-webapp",
+      appName: "SAP-Fiori-web",
       requestor: "admin",
       id: "${majorVersion}",
       versionName: "${BUILD_NUMBER}"
@@ -63,11 +63,11 @@ stage('build') {
           versionName: "${BUILD_NUMBER}",
           versionExtId: "${BUILD_NUMBER}",
           type: 'Jenkins',
-          environmentId: '340bb7d9-62bb-4ae5-949b-afeeed5c326e',
+          environmentId: '01a16dc9-f118-4718-bff4-5d5194bcad08',
           environmentName: 'DEV',
-          appId: '0ca5761b-9ef3-45ef-bca0-d42874eb6064',
+          appId: '9913679a-65be-43d1-98d8-2619ce9f831b',
           description: 'Fiori web Deployment',
-          appName: "Fiori-webapp",
+          appName: "SAP-Fiori-web",
           initiator: "admin",
           result: 'SUCCEEDED',
           buildUrl: "${BUILD_URL}"
