@@ -29,11 +29,11 @@ echo "${previousBuildNumber}"
           versionName: "${previousBuildNumber}",
           versionExtId: "${previousBuildNumber}",
           type: 'Jenkins',
-          environmentId: 'a2e22eb7-8f70-42b5-845d-763a4dedbd47',
+          environmentId: '37415a97-9f37-4785-8ede-6de8372bdc26',
           environmentName: 'PROD',
           appId: '0ca5761b-9ef3-45ef-bca0-d42874eb6064',
-          description: 'Fiori web deployment',
-          appName: "Jenkins-fiori",
+          description: 'Fiori web Prod deployment',
+          appName: "SAP-Fiori-web",
           initiator: "admin",
           result: 'true'
        
