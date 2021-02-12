@@ -1,0 +1,78 @@
+@Library('piper-library-os') _
+
+node() {
+  
+  def check
+  // def majorVersion="1.0.${BUILD_NUMBER}"
+  def majorVersion="${BUILD_NUMBER}"
+  currentBuild.displayName = majorVersion
+  def GIT_COMMIT
+  
+  stage('prepare') {
+      check=checkout scm
+      echo "${check}"
+      setupCommonPipelineEnvironment script:this
+      checkChangeInDevelopment script: this,changeDocumentId:'8000002501'     
+      GIT_COMMIT = check.GIT_COMMIT
+      echo ">>>>>>>${GIT_COMMIT}"
+       }
+
+stage('build') {
+      mtaBuild script: this
+     // step([$class: 'UploadBuild',tenantId: "5ade13625558f2c6688d15ce",revision: "${check.GIT_COMMIT}",appName: "SAP_Build",requestor: "admin",id: "${BUILD_NUMBER}"])
+}
+
+ stage ('Upload Build to Accelerate') {
+      step([$class: 'UploadBuild',
+      tenantId: "5ade13625558f2c6688d15ce",
+      revision: "${GIT_COMMIT}",
+      appName: "Fiori-webapp",
+      requestor: "admin",
+      id: "${majorVersion}",
+      versionName: "${BUILD_NUMBER}"
+    ])
+  }  
+  
+  stage('solmanTrCreate') {
+      transportRequestCreate script:this, changeDocumentId:'8000002501',developmentSystemId: 'N09~ABAP/200',applicationId: 'HCP'
+  }
+  
+  stage('solmanUpload') {
+      transportRequestUploadFile  script:this, changeDocumentId:'8000002501',developmentSystemId: 'N09~ABAP/200',applicationId: 'HCP'
+  }
+  
+  stage('neoDeploy') {
+      //checkout scm
+      
+      checkout([$class: 'GitSCM',
+                                   branches: [[name: '*/master']], 
+                                   doGenerateSubmoduleConfigurations: false, 
+                                   extensions: [], submoduleCfg: [], 
+                                   userRemoteConfigs: [[credentialsId: 'ravishankarojha-github-creds',
+                            url: 'https://github.com/ravishankarojha/techED-Eric.git']]])
+
+      setupCommonPipelineEnvironment script:this
+
+      checkChangeInDevelopment script: this,changeDocumentId:'8000002501'
+    
+      mtaBuild script: this
+      neoDeploy script: this
+      
+      step([$class: 'UploadDeployment',
+          tenantId: "5ade13625558f2c6688d15ce",
+          versionName: "${BUILD_NUMBER}",
+          versionExtId: "${BUILD_NUMBER}",
+          type: 'Jenkins',
+          environmentId: '340bb7d9-62bb-4ae5-949b-afeeed5c326e',
+          environmentName: 'DEV',
+          appId: '0ca5761b-9ef3-45ef-bca0-d42874eb6064',
+          description: 'Fiori web Deployment',
+          appName: "Fiori-webapp",
+          initiator: "admin",
+          result: 'SUCCEEDED',
+          buildUrl: "${BUILD_URL}"
+      ])
+  
+    
+  } 
+}

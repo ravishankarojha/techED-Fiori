@@ -1,0 +1,79 @@
+
+@Library('piper-library-os') _
+
+node() {
+  
+  def check
+  // def majorVersion="1.0.${BUILD_NUMBER}"
+  def majorVersion="${BUILD_NUMBER}"
+  currentBuild.displayName = majorVersion
+  def GIT_COMMIT
+  
+  stage('prepare') {
+      check=checkout scm
+      echo "${check}"
+      setupCommonPipelineEnvironment script:this
+      checkChangeInDevelopment script: this,changeDocumentId:'8000004988'     
+      GIT_COMMIT = check.GIT_COMMIT
+      echo ">>>>>>>${GIT_COMMIT}"
+       }
+
+stage('build') {
+      mtaBuild script: this
+     // step([$class: 'UploadBuild',tenantId: "5ade13625558f2c6688d15ce",revision: "${check.GIT_COMMIT}",appName: "SAP_Build",requestor: "admin",id: "${BUILD_NUMBER}"])
+}
+
+ stage ('Upload Build to Accelerate') {
+      step([$class: 'UploadBuild',
+      tenantId: "5ade13625558f2c6688d15ce",
+      revision: "${GIT_COMMIT}",
+      appName: "Ericsson-SAP",
+      requestor: "admin",
+      id: "${majorVersion}",
+      versionName: "${BUILD_NUMBER}"
+    ])
+  }  
+  
+  stage('solmanTrCreate') {
+      transportRequestCreate script:this, changeDocumentId:'8000004988',developmentSystemId: 'SM1~ABAP/001',applicationId: 'HCP'
+  }
+  
+  stage('solmanUpload') {
+      transportRequestUploadFile  script:this, changeDocumentId:'8000004988',developmentSystemId: 'SM1~ABAP/001',applicationId: 'HCP'
+  }
+  
+  stage('neoDeploy') {
+      //checkout scm
+      
+      checkout([$class: 'GitSCM',
+                                   branches: [[name: '*/master']], 
+                                   doGenerateSubmoduleConfigurations: false, 
+                                   extensions: [], submoduleCfg: [], 
+                                   userRemoteConfigs: [[credentialsId: 'ravishankarojha-github-creds',
+                            url: 'https://github.com/ravishankarojha/techED-Eric.git']]])
+
+      setupCommonPipelineEnvironment script:this
+
+      checkChangeInDevelopment script: this,changeDocumentId:'8000004988'
+    
+      mtaBuild script: this
+      neoDeploy script: this
+      
+      step([$class: 'UploadDeployment',
+          tenantId: "5ade13625558f2c6688d15ce",
+          versionName: "${BUILD_NUMBER}",
+          versionExtId: "${BUILD_NUMBER}",
+          type: 'Jenkins',
+          environmentId: 'f7523f85-1490-4bd2-ac04-d6f5d6fbdd07',
+          environmentName: 'DEV',
+          appId: 'fa79977c-36cd-498f-80e5-1b29aa99fa95',
+          description: 'SAP Deployment',
+          appName: "Ericsson-SAP",
+          initiator: "admin",
+          result: 'true',
+          buildUrl: "${BUILD_URL}"
+      ])
+  
+    
+  } 
+}

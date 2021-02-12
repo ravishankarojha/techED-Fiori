@@ -1,0 +1,44 @@
+@Library('piper-library-os') _
+
+node() {
+
+echo "${previousBuildNumber}"
+ 
+  stage('solmanTrCreate') {
+      transportRequestCreate script:this, changeDocumentId:'8000002501',developmentSystemId: 'N09~ABAP/200',applicationId: 'HCP'
+  }
+  
+  stage('solmanUpload') {
+      transportRequestUploadFile  script:this, changeDocumentId:'8000002501',developmentSystemId: 'N09~ABAP/200',applicationId: 'HCP'
+  }
+  
+  stage('neoDeploy') {
+      checkout scm
+
+      setupCommonPipelineEnvironment script:this
+
+          checkChangeInDevelopment script: this,changeDocumentId:'8000002501'
+    
+      mtaBuild script: this
+      neoDeploy script: this
+  }
+  
+  stage('uploadvelocity') { 
+  step([$class: 'UploadDeployment',
+          tenantId: "5ade13625558f2c6688d15ce",
+          versionName: "${previousBuildNumber}",
+          versionExtId: "${previousBuildNumber}",
+          type: 'Jenkins',
+          environmentId: 'a2e22eb7-8f70-42b5-845d-763a4dedbd47',
+          environmentName: 'PROD',
+          appId: '0ca5761b-9ef3-45ef-bca0-d42874eb6064',
+          description: 'Fiori web deployment',
+          appName: "Jenkins-fiori",
+          initiator: "admin",
+          result: 'true'
+       
+      ])
+      
+ }
+ 
+} 
