@@ -3,7 +3,7 @@
 node() {
   
   def check
-  // def majorVersion="1.0.${BUILD_NUMBER}"
+  // def majorVersion="2.0.${BUILD_NUMBER}"
   def majorVersion="${BUILD_NUMBER}"
   currentBuild.displayName = majorVersion
   def GIT_COMMIT
@@ -29,7 +29,7 @@ stage('build') {
       appName: "SAP-Fiori-web",
       requestor: "admin",
       id: "${majorVersion}",
-      versionName: "${BUILD_NUMBER}"
+      versionName: "2.0.${BUILD_NUMBER}"
     ])
   }  
   
@@ -60,8 +60,8 @@ stage('build') {
       
       step([$class: 'UploadDeployment',
           tenantId: "5ade13625558f2c6688d15ce",
-          versionName: "${BUILD_NUMBER}",
-          versionExtId: "${BUILD_NUMBER}",
+          versionName: "2.0.${BUILD_NUMBER}",
+          versionExtId: "2.0.${BUILD_NUMBER}",
           type: 'Jenkins',
           environmentId: '01a16dc9-f118-4718-bff4-5d5194bcad08',
           environmentName: 'DEV',
