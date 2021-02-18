@@ -1,7 +1,7 @@
 #Steps Specific Configuration
 general:
    changeManagement:
-           endpoint: 'http://192.168.3.5:8000/sap/opu/odata/sap/AI_CRM_GW_CM_CI_SRV'
+           endpoint: 'http://52.184.190.82:8000/sap/opu/odata/sap/AI_CRM_GW_CM_CI_SRV'
            clientOpts: ''
            type: 'SOLMAN'
 
